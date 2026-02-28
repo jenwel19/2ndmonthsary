@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy 2nd Monthsary</title>
+  <style>
+    /* ===== RESET & BASE – dark blue dream ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(145deg, #0a1a2f 0%, #0b2b4a 40%, #0c3b5e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+    }
+
+    /* ===== START SCREEN ===== */
+    .start-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 26, 47, 0.92);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.6s ease, visibility 0.6s;
+    }
+
+    .start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .start-card {
+      background: #132e48;
+      padding: 40px 32px;
+      border-radius: 56px 56px 56px 16px;
+      box-shadow: 0 30px 40px -15px #020c14, 0 10px 20px -5px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      max-width: 380px;
+      width: 90%;
+      border: 3px solid #2a5778;
+    }
+
+    .start-card h1 {
+      font-size: 3rem;
+      margin-bottom: 8px;
+      filter: drop-shadow(2px 4px 8px #000000);
+      color: white;
+    }
+
+    .start-card h2 {
+      font-size: 2rem;
+      color: #9fc5e8;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .start-card p {
+      font-size: 1.3rem;
+      background: #1d3f5c;
+      padding: 12px 16px;
+      border-radius: 40px;
+      margin: 24px 0;
+      color: #d0e2f2;
+      font-weight: 500;
+      border: 2px solid #2a5778;
+    }
+
+    .start-btn {
+      background: #1e4b6e;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      padding: 20px 50px;
+      border-radius: 60px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 12px 0 #0a1a2f, 0 10px 25px #000000;
+      transition: 0.08s linear;
+      border: 2px solid #3a6e96;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    .start-btn:active {
+      transform: translateY(8px);
+      box-shadow: 0 4px 0 #0a1a2f, 0 10px 20px #000000;
+    }
+
+    /* ===== YOUTUBE CONTAINER (invisible) ===== */
+    #youtube-player {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      max-width: 700px;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+
+    .main-container.visible {
+      opacity: 1;
+    }
+
+    /* ===== SQUARE FLASH CARDS ===== */
+    .cards-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card-stack {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 2000px;
+    }
+
+    /* all cards square and identical size - dark theme */
+    .card {
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      background: #132e48;
+      border-radius: 40px;
+      padding: 25px;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7), 0 8px 15px -5px rgba(0,0,0,0.5);
+      border: 3px solid #2a5778;
+      outline: 2px solid #1d3f5c;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      backdrop-filter: blur(2px);
+      color: #e0f0ff;
+    }
+
+    /* card positions - stacked with slight offset */
+    .card[data-page="1"] { 
+      transform: translateX(-15px) translateY(-10px) rotate(-2deg);
+      z-index: 10; 
+    }
+    .card[data-page="2"] { 
+      transform: translateX(-5px) translateY(-5px) rotate(-1deg);
+      z-index: 9; 
+    }
+    .card[data-page="3"] { 
+      transform: translateX(5px) translateY(0px) rotate(0deg);
+      z-index: 8; 
+    }
+    .card[data-page="4"] { 
+      transform: translateX(10px) translateY(5px) rotate(1deg);
+      z-index: 7; 
+    }
+    .card[data-page="5"] { 
+      transform: translateX(15px) translateY(10px) rotate(2deg);
+      z-index: 6; 
+    }
+
+    /* active card (front) */
+    .card.active-card {
+      transform: translateX(0) translateY(0) rotate(0deg) scale(1.05);
+      z-index: 20 !important;
+      box-shadow: 0 30px 40px -12px #000000, 0 15px 25px -5px #020c14;
+      border: 4px solid #3a6e96;
+      outline: 3px solid #5b8db0;
+      cursor: default;
+    }
+
+    /* other cards when not active */
+    .card:not(.active-card) {
+      filter: brightness(0.7) blur(0.5px);
+      opacity: 0.9;
+    }
+
+    .card:not(.active-card):hover {
+      filter: brightness(0.9);
+      transform: translateX(0) translateY(-5px) rotate(0deg) scale(1.02);
+      z-index: 15;
+    }
+
+    /* card number badge - smaller for picture cards */
+    .card-number {
+      display: inline-block;
+      background: #1d4b6e;
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 60px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      border: 2px solid #3a6e96;
+      box-shadow: 0 3px 0 #0a1a2f;
+      align-self: flex-start;
+      z-index: 5;
+    }
+
+    /* ===== PICTURE GRID FOR CARDS 1-4 ===== */
+    .picture-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      width: 100%;
+      height: calc(100% - 40px);
+    }
+
+    .picture-item {
+      width: 100%;
+      height: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 3px solid #3a6e96;
+      box-shadow: 0 8px 0 #0a1a2f;
+    }
+
+    .picture-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .picture-item img:hover {
+      transform: scale(1.05);
+    }
+
+    /* for cards with more than 4 photos (card 4) */
+    .photo-mosaic {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+      height: calc(100% - 40px);
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .photo-mosaic .pic {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 16px 8px 16px 8px;
+      box-shadow: 4px 4px 0 #0a1a2f;
+      border: 2px solid #3a6e96;
+      overflow: hidden;
+    }
+
+    .photo-mosaic .pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ===== CARD 5 STYLES (message + one big picture) ===== */
+    .card5-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 15px;
+    }
+
+    .big-picture-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .big-picture {
+      width: 200px;
+      height: 200px;
+      border-radius: 40px;
+      border: 6px solid #3a6e96;
+      box-shadow: 10px 10px 0 #0a1a2f;
+      overflow: hidden;
+    }
+
+    .big-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .letter-box {
+      background: #1a3349;
+      padding: 18px 16px;
+      border-radius: 30px;
+      border: 4px dashed #2a5778;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #d0e8ff;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+      font-style: italic;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 200px;
+    }
+
+    .signature {
+      margin-top: 5px;
+      font-size: 1rem;
+      text-align: right;
+      color: #9fc5e8;
+      font-weight: 600;
+    }
+
+    /* ===== BOTTOM NAVIGATION BUTTONS ===== */
+    .bottom-nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: rgba(10, 26, 47, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 20px 30px;
+      border-radius: 80px;
+      box-shadow: 0 20px 30px -10px #000000, inset 0 2px 5px rgba(90, 140, 180, 0.3);
+      border: 3px solid #2a5778;
+      width: fit-content;
+      margin-top: 10px;
+    }
+
+    .nav-btn {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: #132e48;
+      border: 4px solid #2a5778;
+      color: #9fc5e8;
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 0 #0a1a2f, 0 5px 15px rgba(0,0,0,0.5);
+      transition: 0.08s linear;
+    }
+
+    .nav-btn.active-nav {
+      background: #1e4b6e;
+      color: white;
+      border-color: #5b8db0;
+      transform: scale(1.1);
+      box-shadow: 0 4px 0 #0a1a2f, 0 8px 20px #000000;
+    }
+
+    .nav-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #0a1a2f, 0 5px 12px #000000;
+    }
+
+    .music-credit {
+      text-align: center;
+      color: #9fc5e8;
+      margin-top: 15px;
+      font-size: 1rem;
+      background: #132e48cc;
+      padding: 8px 18px;
+      border-radius: 60px;
+      display: inline-block;
+      border: 1px solid #2a5778;
+    }
+
+    /* scrollbar for card content */
+    .card::-webkit-scrollbar {
+      width: 5px;
+    }
+    .card::-webkit-scrollbar-track {
+      background: #1d3f5c;
+      border-radius: 10px;
+    }
+    .card::-webkit-scrollbar-thumb {
+      background: #2a5778;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .card-stack {
+        width: 380px;
+        height: 380px;
+      }
+      .card {
+        width: 360px;
+        height: 360px;
+        padding: 20px;
+      }
+      .picture-grid {
+        gap: 10px;
+      }
+      .photo-mosaic {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .big-picture {
+        width: 150px;
+        height: 150px;
+      }
+      .nav-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+      }
+      .bottom-nav {
+        gap: 12px;
+        padding: 15px 20px;
+      }
+      .letter-box {
+        font-size: 0.85rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- YouTube Player Container (invisible) -->
+  <div id="youtube-player"></div>
+
+  <!-- START SCREEN – dark theme -->
+  <div class="start-screen" id="startScreen">
+    <div class="start-card">
+      <h1>💙</h1>
+      <h2>Happy 2nd Monthsary</h2>
+      <p>for my amazing boyfriend</p>
+      <button class="start-btn" id="startBtn">✨ START ✨</button>
+      <div style="margin-top: 20px; color:#9fc5e8;">💙click the start button love💙</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER: square cards + bottom nav -->
+  <div class="main-container" id="mainContainer">
+    
+    <!-- SQUARE FLASH CARDS -->
+    <div class="cards-wrapper" id="cardsWrapper">
+      <div class="card-stack" id="cardStack">
+        
+        <!-- CARD 1 – 4 pictures -->
+        <div class="card active-card" data-page="1" id="card1">
+          <div class="card-number">📸 · our first moment</div>
+          <div class="picture-grid">
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3411.jpg" alt="memory 1"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3414.jpg" alt="memory 2"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3412.jpg" alt="memory 3"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3415.jpg" alt="memory 4"></div>
+          </div>
+        </div>
+        
+        <!-- CARD 2 – 4 pictures -->
+        <div class="card" data-page="2" id="card2">
+          <div class="card-number">📸 · you and me</div>
+          <div class="picture-grid">
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3407.jpg" alt="memory 5"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3408.jpg" alt="memory 6"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3409.jpg" alt="memory 7"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3410.jpg" alt="memory 8"></div>
+          </div>
+        </div>
+        
+        <!-- CARD 3 – 4 pictures -->
+        <div class="card" data-page="3" id="card3">
+          <div class="card-number">📸 · little moments</div>
+          <div class="picture-grid">
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3433.jpg" alt="memory 9"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/2891.jpg" alt="memory 10"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3426.jpg" alt="memory 11"></div>
+            <div class="picture-item"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3427.jpg" alt="memory 12"></div>
+          </div>
+        </div>
+        
+        <!-- CARD 4 – 6 pictures (more memories) -->
+        <div class="card" data-page="4" id="card4">
+          <div class="card-number">📸 · my poging boyfie</div>
+          <div class="photo-mosaic">
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3436.jpg" alt="memory 13"></div>
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3437.jpg" alt="memory 14"></div>
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3438.jpg" alt="memory 15"></div>
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3439.jpg" alt="memory 16"></div>
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3241.jpg" alt="memory 17"></div>
+            <div class="pic"><img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/2784.jpg" alt="memory 18"></div>
+          </div>
+        </div>
+        
+        <!-- CARD 5 – one big picture + message -->
+        <div class="card" data-page="5" id="card5">
+          <div class="card-number">💌 · for you</div>
+          <div class="card5-content">
+            <div class="big-picture-container">
+              <div class="big-picture">
+                <img src="https://uploads.onecompiler.io/43b6p73c4/44e89f69p/3423.jpg" alt="our favorite picture">
+              </div>
+            </div>
+            <div class="letter-box">
+              <strong>Happy 2nd Monthsary, Love ❤️</strong><br><br>
+              It's been two amazing months with you, and honestly, every single day feels special because of you. Thank you for the love, the laughter, the comfort, and the way you always make my days brighter. Even the simplest moments become unforgettable when I'm with you.<br><br>
+              In just two months, you've given me so many reasons to smile and so many memories I'll always treasure. I'm so grateful for your patience, your kindness, and the way you care for me. You make me feel safe, appreciated, and truly loved.<br><br>
+              I know we're still at the beginning of our journey, but I'm excited for all the months and memories ahead of us. No matter what, I'm thankful that I get to call you mine.<br><br>
+              I love you always. Happy 2nd monthsary, my favorite person 💕✨
+            </div>
+            <div class="signature">🌤️ 2 months & counting...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BUTTONS -->
+    <div class="bottom-nav" id="bottomNav">
+      <div class="nav-btn active-nav" data-nav="1">1</div>
+      <div class="nav-btn" data-nav="2">2</div>
+      <div class="nav-btn" data-nav="3">3</div>
+      <div class="nav-btn" data-nav="4">4</div>
+      <div class="nav-btn" data-nav="5">5</div>
+    </div>
+
+    <div class="music-credit">"💙💙💙💙💙"</div>
+  </div>
+
+  <!-- JavaScript for YouTube Music + Flash Cards + Navigation -->
+  <script>
+    // Load YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var ytPlayer;
+    var playerReady = false;
+
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: 'GSD5BfL0xlw',
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0,
+          'disablekb': 1,
+          'enablejsapi': 1,
+          'fs': 0,
+          'iv_load_policy': 3,
+          'modestbranding': 1,
+          'playsinline': 1,
+          'rel': 0,
+          'loop': 1,
+          'playlist': 'GSD5BfL0xlw'
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onError': onPlayerError
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log("YouTube player ready");
+      playerReady = true;
+    }
+
+    function onPlayerError(event) {
+      console.log("YouTube player error:", event.data);
+    }
+
+    function playYouTubeMusic() {
+      if (ytPlayer && playerReady && typeof ytPlayer.playVideo === 'function') {
+        ytPlayer.playVideo();
+      } else {
+        setTimeout(playYouTubeMusic, 300);
+      }
+    }
+
+    // ===== FLASH CARDS + BOTTOM NAVIGATION =====
+    const startScreen = document.getElementById('startScreen');
+    const mainContainer = document.getElementById('mainContainer');
+    const startBtn = document.getElementById('startBtn');
+    const cards = document.querySelectorAll('.card');
+    const navBtns = document.querySelectorAll('.nav-btn');
+
+    // START button
+    startBtn.addEventListener('click', function() {
+      startScreen.classList.add('hidden');
+      mainContainer.classList.add('visible');
+      playYouTubeMusic();
+    });
+
+    // Function to switch to a specific page
+    function goToPage(pageNumber) {
+      // Remove active from all cards and nav buttons
+      cards.forEach(c => c.classList.remove('active-card'));
+      navBtns.forEach(btn => btn.classList.remove('active-nav'));
+
+      // Activate the selected card
+      const targetCard = document.getElementById(`card${pageNumber}`);
+      if (targetCard) {
+        targetCard.classList.add('active-card');
+      }
+
+      // Activate the corresponding nav button
+      navBtns.forEach(btn => {
+        if (btn.dataset.nav == pageNumber) {
+          btn.classList.add('active-nav');
+        }
+      });
+    }
+
+    // Card click handling
+    cards.forEach(card => {
+      card.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const pageNum = this.dataset.page;
+        goToPage(pageNum);
+      });
+    });
+
+    // Bottom navigation button click handling
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const pageNum = this.dataset.nav;
+        goToPage(pageNum);
+      });
+    });
+
+    // Initialize with page 1 active
+    window.addEventListener('load', function() {
+      goToPage(1);
+    });
+  </script>
+
+  <!-- ===== INSTRUCTIONS ===== -->
+  <!-- 
+    ✅ CARDS 1-4: picture only (4-6 photos per card)
+    ✅ CARD 5: one big picture + your beautiful message
+    ✅ DARK BLUE THEME throughout
+    ✅ BOTTOM NAVIGATION: buttons 1-5
+    ✅ YOUTUBE MUSIC: Chasing Cars instrumental
+    
+    TO ADD YOUR PHOTOS:
+    - Cards 1-3: photos 1-12 (4 each)
+    - Card 4: photos 13-18 (6 photos)
+    - Card 5: your-special-photo.jpg
+    Replace all placeholders with your actual image file names
+  -->
+</body>
+</html>
